@@ -18,3 +18,8 @@ def run():
         'access_token': config.get('twitter', 'access_token'),
         'access_token_secret': config.get('twitter', 'access_token_secret')}
     #twitter = TwitterAPI(**twitter_kwargs)
+
+
+
+    for p in windowbox.walk_new_posts():
+        print p.id
