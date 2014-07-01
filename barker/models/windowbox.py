@@ -5,9 +5,10 @@ from urlparse import urlparse, urlunparse
 
 
 class WindowboxAPI(object):
-    def __init__(self, site_url, state_file):
+    def __init__(self, site_url, state_file, timeout=10):
         self.site_url = site_url
         self.state_file = state_file
+        self.timeout = timeout
 
         self._shelf = shelve.open(filename=self.state_file)
 
@@ -25,10 +26,13 @@ class WindowboxAPI(object):
         headers = {'Accept': 'application/json'}
 
         while True:
-            response = requests.get(
-                url, params={'since': start_offset}, headers=headers, timeout=10)
+            params = {'since': start_offset}
+            response = requests.get(url, params=params, headers=headers, timeout=self.timeout)
 
-            if response.status_code is not requests.codes.ok:
+            if response.status_code == requests.codes.not_found:
+                # If we hit a 404, stop the whole process
+                break
+            elif response.status_code != requests.codes.ok:
                 raise RuntimeError('API response code is not OK')
 
             try:

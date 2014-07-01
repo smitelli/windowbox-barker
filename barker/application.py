@@ -22,4 +22,4 @@ def run():
 
 
     for p in windowbox.walk_new_posts():
-        print p.id
+        print p.id, p.message
