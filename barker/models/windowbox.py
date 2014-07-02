@@ -21,6 +21,9 @@ class WindowboxAPI(object):
             self._shelf['start_offset'] = post.id
             self._shelf.sync()
 
+    def get_post_url_for(self, post_id):
+        return self._get_absolute_url_for('/post/{}'.format(post_id))
+
     def _get_posts_since(self, start_offset):
         url = self._get_absolute_url_for('/')
         headers = {'Accept': 'application/json'}
@@ -59,3 +62,14 @@ class WindowboxAPI(object):
 class PostModel(object):
     def __init__(self, **kwargs):
         vars(self).update(kwargs)
+
+    def get_message(self, length=None, suffix='...'):
+        if length is None or len(self.message) <= length:
+            return self.message
+
+        length -= len(suffix)
+
+        if self.message[length].isspace():
+            return self.message[:length] + suffix
+        else:
+            return self.message[:length].rsplit(' ', 1)[0] + suffix
