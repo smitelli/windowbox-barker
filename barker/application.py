@@ -23,13 +23,17 @@ def run():
     #twitter = TwitterAPI(**twitter_kwargs)
 
 
-    scraper = MetadataScraper(timeout=windowbox_kwargs['timeout'])
+    scraper = MetadataScraper(timeout=windowbox.timeout)
     for p in windowbox.walk_new_posts():
+        message = p.get_message(20)
         page_url = windowbox.get_post_url_for(p.id)
 
-        # Fix race
+        # Windowbox has a pretty gross thundering herd bug when building new
+        # image derivatives. Since Twitter is about to wail on this page, make
+        # a speculative hit on the image derivative to make sure it's built
+        # before we tweet it, allowing the site to handle the traffic better.
         page = scraper.parse(page_url)
         image_url = page.get_twitter_image_url()
         scraper.load(image_url)
 
-        print p.get_message(20), page_url
+        print message, page_url
