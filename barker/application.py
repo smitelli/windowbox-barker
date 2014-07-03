@@ -31,7 +31,7 @@ def run():
     for p in windowbox.walk_new_posts():
         message = p.get_message(message_length_max)
         page_url = windowbox.get_post_url_for(p.id)
-        tweet_text = '{} {}'.format(message, page_url)
+        tweet_text = u'{} {}'.format(message, page_url)
 
         # Windowbox has a pretty gross thundering herd bug when building new
         # image derivatives. Since Twitter is about to wail on this page, make
@@ -41,5 +41,5 @@ def run():
         image_url = page.get_twitter_image_url()
         scraper.load(image_url)
 
-        status = twitter.update_status(status=tweet_text)
-        print status
+        #status = twitter.update_status(status=tweet_text)
+        print tweet_text
