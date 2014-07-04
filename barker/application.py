@@ -26,10 +26,13 @@ def run():
     auth.set_access_token(access_token, access_token_secret)
     twitter = tweepy.API(auth)
 
-    # TODO find t.co URL length
+    print 'Starting windowbox-barker...'
+
+    # Count the length of a t.co URL and the space that precedes it
+    url_padding = twitter.configuration()['short_url_length'] + 1
 
     for p in windowbox.walk_new_posts():
-        message = p.get_message(message_length_max)
+        message = p.get_message(message_length_max - url_padding)
         page_url = windowbox.get_post_url_for(p.id)
         tweet_text = u'{} {}'.format(message, page_url)
 
@@ -41,5 +44,11 @@ def run():
         image_url = page.get_twitter_image_url()
         scraper.load(image_url)
 
-        #status = twitter.update_status(status=tweet_text)
-        print tweet_text
+        print u'Sending [{}]...'.format(tweet_text)
+
+        status = twitter.update_status(status=tweet_text)
+        if not status.created_at:
+            raise Exception('Tweet was not created!')
+
+        print 'Created.'
+    print 'Done.'
