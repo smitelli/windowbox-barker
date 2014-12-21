@@ -25,13 +25,17 @@ def run():
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
     twitter = tweepy.API(auth)
+    url_padding = None
 
     print 'Starting windowbox-barker...'
 
-    # Count the length of a t.co URL and the space that precedes it
-    url_padding = twitter.configuration()['short_url_length'] + 1
-
     for p in windowbox.walk_new_posts():
+        # Only read Twitter's 'short_url_length' param once, to prevent rate-
+        # limiting issues. Don't read it at all if there are no posts.
+        if url_padding is None:
+            # The current length of a t.co URL PLUS one space preceding it
+            url_padding = twitter.configuration()['short_url_length'] + 1
+
         message = p.get_message(message_length_max - url_padding)
         page_url = windowbox.get_post_url_for(p.id)
         tweet_text = u'{} {}'.format(message, page_url)
