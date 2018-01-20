@@ -12,10 +12,10 @@ class WindowboxAPI(object):
 
         self._shelf = shelve.open(filename=self.state_file)
 
-    def walk_new_posts(self):
+    def walk_new_posts(self, limit=None):
         start_offset = self._shelf.get('start_offset', 0)
 
-        for post in self._get_posts_since(start_offset):
+        for post in self._get_posts_since(start_offset, limit=limit):
             yield post
 
             self._shelf['start_offset'] = post.id
@@ -24,10 +24,11 @@ class WindowboxAPI(object):
     def get_post_url_for(self, post_id):
         return self._get_absolute_url_for('/post/{}'.format(post_id))
 
-    def _get_posts_since(self, start_offset):
+    def _get_posts_since(self, start_offset, limit=None):
         url = self._get_absolute_url_for('/')
         headers = {'Accept': 'application/json'}
 
+        count = 0
         while True:
             params = {'since': start_offset}
             response = requests.get(url, params=params, headers=headers, timeout=self.timeout)
@@ -45,6 +46,10 @@ class WindowboxAPI(object):
 
             for post in data['posts']:
                 yield PostModel(**post)
+
+                count += 1
+                if limit is not None and count >= limit:
+                    raise StopIteration
 
             if data['has_next']:
                 start_offset = data['posts'][-1]['id']

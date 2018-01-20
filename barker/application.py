@@ -5,6 +5,7 @@ from barker import AppPath
 from barker.models.scraper import MetadataScraper
 from barker.models.windowbox import WindowboxAPI
 
+
 def run():
     config = ConfigParser.SafeConfigParser()
     config.read(AppPath.base('config.ini'))
@@ -13,6 +14,7 @@ def run():
         'site_url': config.get('windowbox', 'site_url'),
         'state_file': config.get('windowbox', 'state_file'),
         'timeout': config.getint('windowbox', 'timeout')}
+    post_count_limit = config.getint('windowbox', 'post_count_limit')
     windowbox = WindowboxAPI(**windowbox_kwargs)
     scraper = MetadataScraper(timeout=windowbox.timeout)
 
@@ -29,7 +31,7 @@ def run():
 
     print 'Starting windowbox-barker...'
 
-    for p in windowbox.walk_new_posts():
+    for p in windowbox.walk_new_posts(limit=post_count_limit):
         # Only read Twitter's 'short_url_length' param once, to prevent rate-
         # limiting issues. Don't read it at all if there are no posts.
         if url_padding is None:
